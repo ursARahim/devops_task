@@ -1,0 +1,8 @@
+---
+# Playbook to configure the Nginx reverse proxy only
+
+- name: Configure Nginx reverse proxy
+  hosts: proxy
+  become: yes
+  roles:
+    - nginx_proxy 

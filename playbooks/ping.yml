@@ -1,0 +1,41 @@
+---
+# Enhanced ping playbook to test connectivity and gather system information
+
+- name: Test connection to all hosts
+  hosts: all
+  tasks:
+    - name: Ping test
+      ping:
+      
+    - name: Get hostname
+      command: hostname
+      register: hostname_output
+      changed_when: false
+      
+    - name: Get OS information
+      command: lsb_release -a
+      register: os_info
+      changed_when: false
+      ignore_errors: yes
+      
+    - name: Get current user
+      command: whoami
+      register: whoami_output
+      changed_when: false
+      
+    - name: Get Python version
+      command: python3 --version
+      register: python_version
+      changed_when: false
+      
+    - name: Display system information
+      debug:
+        msg: |
+          Host: {{ inventory_hostname }} ({{ ansible_host }})
+          Hostname: {{ hostname_output.stdout }}
+          Current User: {{ whoami_output.stdout }}
+          Python Version: {{ python_version.stdout }}
+          OS Information:
+          {% for line in os_info.stdout_lines %}
+            {{ line }}
+          {% endfor %} 

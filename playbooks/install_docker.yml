@@ -1,0 +1,62 @@
+---
+# Playbook to install Docker using the official Docker installation script
+
+- name: Install Docker on all servers
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name:
+          - curl
+          - ca-certificates
+        state: present
+
+    - name: Download Docker installation script
+      get_url:
+        url: https://get.docker.com
+        dest: /tmp/get-docker.sh
+        mode: '0755'
+
+    - name: Run Docker installation script
+      command: sh /tmp/get-docker.sh
+      args:
+        creates: /usr/bin/docker
+      register: docker_install
+      ignore_errors: yes
+
+    - name: Display Docker installation output
+      debug:
+        var: docker_install.stdout_lines
+      when: docker_install.stdout_lines is defined
+
+    - name: Make sure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Remove Docker installation script
+      file:
+        path: /tmp/get-docker.sh
+        state: absent
+
+    - name: Verify Docker installation
+      command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Display Docker version
+      debug:
+        var: docker_version.stdout 

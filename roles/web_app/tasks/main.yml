@@ -1,0 +1,48 @@
+---
+# Create directory for the web application
+- name: Create web app directory
+  file:
+    path: /home/{{ ansible_user }}/web_app
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+  become: yes
+
+# Copy Dockerfile to target server
+- name: Copy Dockerfile
+  copy:
+    src: Dockerfile
+    dest: /home/{{ ansible_user }}/web_app/Dockerfile
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+
+# Copy index.html to target server
+- name: Copy index.html
+  copy:
+    src: index.html
+    dest: /home/{{ ansible_user }}/web_app/index.html
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+
+# Build the Docker image
+- name: Build web app Docker image
+  docker_image:
+    name: webapp
+    tag: latest
+    build:
+      path: /home/{{ ansible_user }}/web_app
+    source: build
+    state: present
+
+# Run the Docker container
+- name: Run web app container
+  docker_container:
+    name: webapp
+    image: webapp:latest
+    state: started
+    restart_policy: always
+    published_ports:
+      - "80:80" 
