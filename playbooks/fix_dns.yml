@@ -1,0 +1,34 @@
+---
+# Simple playbook to fix DNS resolution issues
+
+- name: Fix DNS resolution issues on VMs
+  hosts: all
+  become: yes
+  tasks:
+    - name: Back up current resolv.conf
+      shell: cp /etc/resolv.conf /etc/resolv.conf.backup
+      args:
+        creates: /etc/resolv.conf.backup
+      
+    - name: Add Google DNS to beginning of resolv.conf (8.8.8.8)
+      lineinfile:
+        path: /etc/resolv.conf
+        line: "nameserver 8.8.8.8"
+        insertbefore: BOF
+        
+    - name: Add Google DNS as secondary (8.8.4.4)
+      lineinfile:
+        path: /etc/resolv.conf
+        line: "nameserver 8.8.4.4"
+        insertafter: "nameserver 8.8.8.8"
+      
+    - name: Check if get.docker.com is resolvable now
+      command: nslookup get.docker.com
+      register: nslookup_result
+      ignore_errors: yes
+      changed_when: false
+      
+    - name: Display nslookup result
+      debug:
+        var: nslookup_result.stdout_lines
+      when: nslookup_result.stdout_lines is defined 

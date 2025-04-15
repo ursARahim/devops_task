@@ -20,16 +20,25 @@ if [ "$1" == "ping" ]; then
     exit 0
 fi
 
+if [ "$1" == "fix-dns" ]; then
+    print_header "Fixing DNS resolution issues on all hosts"
+    ansible-playbook playbooks/fix_dns.yml
+    exit 0
+fi
+
 if [ "$1" == "docker" ]; then
     print_header "Installing Docker on all hosts"
     
     print_step "Step 1: Testing connectivity to hosts"
     ansible-playbook playbooks/ping.yml
     
-    print_step "Step 2: Installing Docker using the official installation script"
+    print_step "Step 2: Fixing DNS resolution (adding Google DNS)"
+    ansible-playbook playbooks/fix_dns.yml
+    
+    print_step "Step 3: Installing Docker using the official installation script"
     ansible-playbook playbooks/install_docker.yml
     
-    print_step "Step 3: Verifying Docker installation"
+    print_step "Step 4: Verifying Docker installation"
     ansible all -m command -a "docker --version"
     
     print_header "Docker installation complete!"
@@ -56,9 +65,10 @@ if [ "$1" == "all" ] || [ -z "$1" ]; then
 fi
 
 echo "Unknown command: $1"
-echo "Usage: ./deploy.sh [ping|docker|webapp|nginx|all]"
+echo "Usage: ./deploy.sh [ping|fix-dns|docker|webapp|nginx|all]"
 echo "  ping    - Test connectivity to all hosts"
-echo "  docker  - Install Docker on all hosts"
+echo "  fix-dns - Fix DNS resolution issues on all hosts"
+echo "  docker  - Install Docker on all hosts (includes DNS fix)"
 echo "  webapp  - Deploy web application to web servers"
 echo "  nginx   - Configure Nginx reverse proxy"
 echo "  all     - Deploy entire infrastructure (default)"

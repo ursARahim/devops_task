@@ -15,20 +15,20 @@
     state: present
   become: yes
 
-# Download Docker installation script
-- name: Download Docker installation script
-  get_url:
-    url: https://get.docker.com
-    dest: /tmp/get-docker.sh
-    mode: '0755'
+# Download Docker installation script with curl
+- name: Download Docker installation script with curl
+  shell: curl -fsSL https://get.docker.com -o get-docker.sh
+  args:
+    chdir: /home/{{ ansible_user }}
   become: yes
 
-# Run Docker installation script
-- name: Run Docker installation script
-  command: sh /tmp/get-docker.sh
+# Execute Docker installation script
+- name: Execute Docker installation script
+  shell: sh get-docker.sh
   args:
-    creates: /usr/bin/docker
+    chdir: /home/{{ ansible_user }}
   become: yes
+  register: docker_install
 
 # Make sure Docker service is running
 - name: Make sure Docker is running
@@ -49,6 +49,6 @@
 # Remove Docker installation script
 - name: Remove Docker installation script
   file:
-    path: /tmp/get-docker.sh
+    path: /home/{{ ansible_user }}/get-docker.sh
     state: absent
   become: yes 

@@ -6,7 +6,7 @@
   become: yes
   tasks:
     - name: Update apt cache
-      apt:
+      apt:  
         update_cache: yes
         cache_valid_time: 3600
 
@@ -17,18 +17,17 @@
           - ca-certificates
         state: present
 
-    - name: Download Docker installation script
-      get_url:
-        url: https://get.docker.com
-        dest: /tmp/get-docker.sh
-        mode: '0755'
-
-    - name: Run Docker installation script
-      command: sh /tmp/get-docker.sh
+    - name: Download Docker installation script with curl
+      shell: curl -fsSL https://get.docker.com -o get-docker.sh
       args:
-        creates: /usr/bin/docker
+        chdir: /home/{{ ansible_user }}
+      register: curl_result
+
+    - name: Execute Docker installation script
+      shell: sh get-docker.sh
+      args:
+        chdir: /home/{{ ansible_user }}
       register: docker_install
-      ignore_errors: yes
 
     - name: Display Docker installation output
       debug:
@@ -49,7 +48,7 @@
 
     - name: Remove Docker installation script
       file:
-        path: /tmp/get-docker.sh
+        path: /home/{{ ansible_user }}/get-docker.sh
         state: absent
 
     - name: Verify Docker installation
