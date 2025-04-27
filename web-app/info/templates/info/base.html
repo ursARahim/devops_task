@@ -47,6 +47,23 @@
             border-radius: 3px;
             overflow-wrap: break-word;
         }
+        .git-commit, .git-message {
+            margin-top: 5px;
+            border-left: 4px solid #28a745;
+            background-color: #f0fff0;
+        }
+        .git-commit .info-label, .git-message .info-label {
+            color: #28a745;
+        }
+        .git-commit .info-value {
+            font-family: monospace;
+            background-color: #f8fff8;
+        }
+        .git-message .info-value {
+            background-color: #f8fff8;
+            white-space: pre-line;
+            font-style: italic;
+        }
         {% block extra_styles %}{% endblock %}
     </style>
 </head>
