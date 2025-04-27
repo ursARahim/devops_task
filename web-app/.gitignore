@@ -1,0 +1,25 @@
+# Ignore virtual environment
+webvenv/
+venv/
+env/
+.env/
+
+# Ignore database files
+*.sqlite3
+db.sqlite3
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff
+*.log
+local_settings.py
+media/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo

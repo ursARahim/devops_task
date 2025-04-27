@@ -1,0 +1,39 @@
+{% extends "info/base.html" %}
+
+{% block title %}VM System Information{% endblock %}
+
+{% block header %}VM Information{% endblock %}
+
+{% block content %}
+<div class="info-container">
+    <div class="info-item">
+        <div class="info-label">Hostname:</div>
+        <div class="info-value">{{ hostname }}</div>
+    </div>
+    
+    <div class="info-item">
+        <div class="info-label">IP Address:</div>
+        <div class="info-value">{{ ip_address }}</div>
+    </div>
+    
+    <div class="info-item">
+        <div class="info-label">OS Name:</div>
+        <div class="info-value">{{ os_name }}</div>
+    </div>
+    
+    <div class="info-item">
+        <div class="info-label">OS Version:</div>
+        <div class="info-value">{{ os_version }}</div>
+    </div>
+    
+    <div class="info-item">
+        <div class="info-label">Platform:</div>
+        <div class="info-value">{{ platform }}</div>
+    </div>
+    
+    <div class="info-item">
+        <div class="info-label">Processor:</div>
+        <div class="info-value">{{ processor }}</div>
+    </div>
+</div>
+{% endblock %} 

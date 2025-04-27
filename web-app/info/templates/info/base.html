@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Server Information{% endblock %}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .info-container {
+            display: grid;
+            gap: 15px;
+        }
+        .info-item {
+            display: flex;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #4a6fa5;
+        }
+        .info-label {
+            font-weight: bold;
+            width: 150px;
+            color: #4a6fa5;
+        }
+        .info-value {
+            flex: 1;
+            font-size: 16px;
+            background-color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            overflow-wrap: break-word;
+        }
+        {% block extra_styles %}{% endblock %}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{% block header %}Server Information{% endblock %}</h1>
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html> 
