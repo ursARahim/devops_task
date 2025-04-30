@@ -1,0 +1,54 @@
+---
+# Playbook to deploy the Django web application to web server VMs
+- name: Deploy Django Web Application
+  hosts: web_servers
+  become: yes
+  vars:
+    app_dir: "/opt/web-app"
+    app_port: 8000
+
+  tasks:
+    - name: Create application directory if it doesn't exist
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Copy web application files
+      ansible.builtin.copy:
+        src: ../web-app/
+        dest: "{{ app_dir }}/"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Create production docker-compose.yml
+      ansible.builtin.template:
+        src: ../templates/docker-compose.prod.yml.j2
+        dest: "{{ app_dir }}/docker-compose.prod.yml"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
+    - name: Deploy Django application with Docker Compose
+      community.docker.docker_compose:
+        project_src: "{{ app_dir }}"
+        files:
+          - docker-compose.prod.yml
+        state: present
+        pull: yes
+        recreate: always
+        build: yes
+
+    - name: Verify deployment
+      ansible.builtin.uri:
+        url: "http://localhost:{{ app_port }}"
+        status_code: 200
+      register: webapp_result
+      ignore_errors: yes
+
+    - name: Report deployment status
+      ansible.builtin.debug:
+        msg: "Web application deployment {{ 'succeeded' if webapp_result.status == 200 else 'may have issues' }}" 

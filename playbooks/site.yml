@@ -5,6 +5,10 @@
 - import_playbook: install_docker.yml
   tags: ['common', 'docker']
 
+# Deploy web application to web servers
+- import_playbook: deploy_webapp.yml
+  tags: ['webapp']
+
 # Configure Nginx reverse proxy on VM4
 - import_playbook: configure_nginx.yml
   tags: ['nginx_proxy'] 

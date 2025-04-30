@@ -48,7 +48,21 @@ fi
 
 if [ "$1" == "webapp" ]; then
     print_header "Deploying web application to web servers"
+    
+    print_step "Step 1: Testing connectivity to web servers"
+    ansible-playbook -l web_servers playbooks/ping.yml
+    
+    print_step "Step 2: Deploying Django application to web servers (VM1, VM2, VM3)"
     ansible-playbook playbooks/deploy_webapp.yml
+    
+    print_step "Step 3: Verifying web application deployment"
+    ansible web_servers -m command -a "docker ps"
+    
+    print_header "Web application deployment complete!"
+    echo "You can now access your application at:"
+    echo "VM1: http://192.168.123.10:8000"
+    echo "VM2: http://192.168.123.11:8000"
+    echo "VM3: http://192.168.123.12:8000"
     exit 0
 fi
 
