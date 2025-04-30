@@ -1,6 +1,11 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        # These values will be captured at build time
+        GIT_COMMIT_HASH: ${GIT_COMMIT_HASH}
+        GIT_COMMIT_MESSAGE: ${GIT_COMMIT_MESSAGE}
     ports:
       - "8000:8000"
     volumes:

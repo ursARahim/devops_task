@@ -10,6 +10,17 @@ ENV PYTHONDONTWRITEBYTECODE=1
 #Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1 
 
+# Install git for build process
+RUN apt-get update && apt-get install -y git && apt-get clean
+
+# Get git information at build time and store as environment variables
+ARG GIT_COMMIT_HASH
+ARG GIT_COMMIT_MESSAGE
+
+# Set default values in case build args aren't provided
+ENV GIT_COMMIT_HASH=${GIT_COMMIT_HASH:-"Unknown"}
+ENV GIT_COMMIT_MESSAGE=${GIT_COMMIT_MESSAGE:-"Unknown"}
+
 RUN pip install --upgrade pip 
 
 COPY requirements.txt .

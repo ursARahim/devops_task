@@ -46,6 +46,16 @@ class HostnameView(TemplateView):
             'message': 'No message available'
         }
         
+        # First check if git info is provided as environment variables
+        git_hash = os.environ.get('GIT_COMMIT_HASH')
+        git_message = os.environ.get('GIT_COMMIT_MESSAGE')
+        
+        if git_hash:
+            short_hash = git_hash[:8]
+            result['hash'] = f"{short_hash} (full: {git_hash})"
+            result['message'] = git_message or 'No message available'
+            return result
+        
         try:
             # Get the project root directory
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
