@@ -58,6 +58,12 @@ if [ "$1" == "nginx" ]; then
     exit 0
 fi
 
+if [ "$1" == "nginx-docker" ]; then
+    print_header "Installing Nginx with Docker as reverse proxy on VM4"
+    ansible-playbook playbooks/nginx_docker.yml
+    exit 0
+fi
+
 if [ "$1" == "all" ] || [ -z "$1" ]; then
     print_header "Deploying entire infrastructure"
     ansible-playbook playbooks/site.yml
@@ -65,11 +71,12 @@ if [ "$1" == "all" ] || [ -z "$1" ]; then
 fi
 
 echo "Unknown command: $1"
-echo "Usage: ./deploy.sh [ping|fix-dns|docker|webapp|nginx|all]"
-echo "  ping    - Test connectivity to all hosts"
-echo "  fix-dns - Fix DNS resolution issues on all hosts"
-echo "  docker  - Install Docker on all hosts (includes DNS fix)"
-echo "  webapp  - Deploy web application to web servers"
-echo "  nginx   - Configure Nginx reverse proxy"
-echo "  all     - Deploy entire infrastructure (default)"
+echo "Usage: ./deploy.sh [ping|fix-dns|docker|webapp|nginx|nginx-docker|all]"
+echo "  ping         - Test connectivity to all hosts"
+echo "  fix-dns      - Fix DNS resolution issues on all hosts"
+echo "  docker       - Install Docker on all hosts (includes DNS fix)"
+echo "  webapp       - Deploy web application to web servers"
+echo "  nginx        - Configure Nginx reverse proxy"
+echo "  nginx-docker - Install Nginx with Docker as reverse proxy on VM4 (simple version)"
+echo "  all          - Deploy entire infrastructure (default)"
 exit 1 
