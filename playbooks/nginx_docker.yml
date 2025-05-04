@@ -3,6 +3,23 @@
   hosts: proxy
   become: yes
   tasks:
+    - name: Stop existing Nginx container if exists
+      shell: docker stop nginx-proxy || true
+      ignore_errors: yes
+
+    - name: Remove existing Nginx container if exists
+      shell: docker rm nginx-proxy || true
+      ignore_errors: yes
+
+    - name: Remove existing Nginx images
+      shell: docker rmi nginx:latest || true
+      ignore_errors: yes
+
+    - name: Remove container creation flag file if exists
+      file:
+        path: /tmp/nginx_container_created
+        state: absent
+
     - name: Create directory for Nginx configuration
       file:
         path: /home/{{ ansible_user }}/nginx-proxy
@@ -33,17 +50,17 @@
               keepalive_timeout  65;
 
               upstream django_app {
-                  server 192.168.123.10:8000;
-                  server 192.168.123.11:8000;
-                  server 192.168.123.12:8000;
+                  server 192.168.123.10:80;
+                  server 192.168.123.11:80;
+                  server 192.168.123.12:80;
               }
 
               server {
                   listen       80;
-                  server_name  _;
+                  server_name  myapp.com www.myapp.com;
 
                   location /static/ {
-                      proxy_pass http://192.168.123.10:8000;
+                      proxy_pass http://192.168.123.10:80;
                       proxy_set_header Host $host;
                       proxy_set_header X-Real-IP $remote_addr;
                   }
@@ -58,6 +75,10 @@
               }
           }
         mode: '0644'
+      register: nginx_config
+
+    - name: Pull latest Nginx image
+      shell: docker pull nginx:latest
 
     - name: Run Nginx container
       shell: docker run -d --name nginx-proxy -p 80:80 -v /home/{{ ansible_user }}/nginx-proxy/nginx.conf:/etc/nginx/nginx.conf:ro --restart=always nginx:latest
