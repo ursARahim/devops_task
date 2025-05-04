@@ -78,6 +78,33 @@ if [ "$1" == "all" ] || [ -z "$1" ]; then
     exit 0
 fi
 
+if [ "$1" == "prometheus" ]; then
+    print_header "Setting up Prometheus monitoring with Docker"
+    
+    print_step "Installing Prometheus"
+    ansible-playbook playbooks/prometheus_docker.yml
+    
+    print_header "Prometheus setup complete!"
+    echo "You can access Prometheus at:"
+    echo "http://192.168.123.13:9090"
+    exit 0
+fi
+
+if [ "$1" == "grafana" ]; then
+    print_header "Setting up Grafana monitoring with Docker"
+    
+    print_step "Installing Grafana"
+    ansible-playbook playbooks/grafana_docker.yml
+    
+    print_header "Grafana setup complete!"
+    echo "You can access Grafana at:"
+    echo "http://192.168.123.13:3000"
+    echo "Default Grafana credentials:"
+    echo "Username: admin"
+    echo "Password: admin"
+    exit 0
+fi
+
 echo "Unknown command: $1"
 echo "Usage: ./deploy.sh [ping|fix-dns|docker|webapp|nginx|nginx-docker|reload-nginx|setup-domain|all]"
 echo "  ping         - Test connectivity to all hosts"

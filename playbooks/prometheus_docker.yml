@@ -1,0 +1,53 @@
+---
+- name: Install Prometheus using Docker on VM4
+  hosts: proxy
+  become: yes
+  tasks:
+    - name: Create directories for Prometheus
+      file:
+        path: "/home/{{ ansible_user }}/{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - prometheus
+        - prometheus/config
+
+    - name: Create Prometheus configuration
+      copy:
+        dest: "/home/{{ ansible_user }}/prometheus/config/prometheus.yml"
+        content: |
+          global:
+            scrape_interval: 5s
+            evaluation_interval: 5s
+
+          scrape_configs:
+            - job_name: 'django'
+              static_configs:
+                - targets:
+                  - '192.168.123.10:80'  # VM1
+                  - '192.168.123.11:80'  # VM2
+                  - '192.168.123.12:80'  # VM3
+              metrics_path: '/metrics'    # Django metrics endpoint
+
+    - name: Stop existing Prometheus container if exists
+      shell: docker stop prometheus || true
+      ignore_errors: yes
+
+    - name: Remove existing Prometheus container if exists
+      shell: docker rm prometheus || true
+      ignore_errors: yes
+
+    - name: Pull Prometheus image
+      shell: docker pull prom/prometheus:latest
+
+    - name: Run Prometheus container
+      shell: >
+        docker run -d
+        --name prometheus
+        --restart always
+        -p 9090:9090
+        -v /home/{{ ansible_user }}/prometheus/config:/etc/prometheus
+        prom/prometheus:latest
+        --config.file=/etc/prometheus/prometheus.yml
+        --web.external-url=/prometheus/
+        --web.route-prefix=/prometheus/ 

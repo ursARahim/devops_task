@@ -1,0 +1,35 @@
+---
+- name: Install Grafana using Docker on VM4
+  hosts: proxy
+  become: yes
+  tasks:
+    - name: Create directories for Grafana
+      file:
+        path: "/home/{{ ansible_user }}/{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - grafana
+        - grafana/data
+
+    - name: Stop existing Grafana container if exists
+      shell: docker stop grafana || true
+      ignore_errors: yes
+
+    - name: Remove existing Grafana container if exists
+      shell: docker rm grafana || true
+      ignore_errors: yes
+
+    - name: Pull Grafana image
+      shell: docker pull grafana/grafana:latest
+
+    - name: Run Grafana container
+      shell: >
+        docker run -d
+        --name grafana
+        --restart always
+        -p 3000:3000
+        -v /home/{{ ansible_user }}/grafana/data:/var/lib/grafana
+        -e "GF_SERVER_ROOT_URL=http://myapp.com/grafana"
+        -e "GF_SERVER_SERVE_FROM_SUB_PATH=true"
+        grafana/grafana:latest
