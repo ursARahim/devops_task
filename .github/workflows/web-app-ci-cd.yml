@@ -46,9 +46,13 @@ jobs:
     
     steps:
       - name: Deploy to ${{ matrix.vm.hostname }}
-        run: |
-          ssh abdur@${{ matrix.vm.ip }} "docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} && \
-          docker pull ${{ secrets.DOCKER_USERNAME }}/django-web-app:latest && \
-          docker stop django-web-app || true && \
-          docker rm django-web-app || true && \
-          docker run -p 80:80 -e DEBUG=True -e ALLOWED_HOSTS=localhost,127.0.0.1,${{ matrix.vm.ip }} ${{ secrets.DOCKER_USERNAME }}/django-web-app:latest"
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ matrix.vm.ip }}
+          username: abdur
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/django-web-app:latest
+            docker stop django-web-app || true
+            docker rm django-web-app || true
+            docker run -d --name django-web-app -p 80:80 -e DEBUG=True -e ALLOWED_HOSTS=localhost,127.0.0.1,${{ matrix.vm.ip }} ${{ secrets.DOCKER_USERNAME }}/django-web-app:latest
