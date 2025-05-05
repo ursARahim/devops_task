@@ -1,91 +1,101 @@
-# DevOps Automation with Ansible
+# DevOps Project: Automated Multi-VM Web Application Deployment with Monitoring
 
-This project contains Ansible playbooks to automate the deployment of a web application infrastructure with Docker and Nginx reverse proxy.
+## Overview
 
-## Infrastructure
+This project demonstrates a complete DevOps workflow that includes environment setup, web application development, CI/CD deployment using GitHub Actions, and monitoring using Prometheus and Grafana. It involves manual setup, automation with Ansible, Dockerization, and system monitoring in a multi-VM environment.
 
-- 3 VMs (192.168.123.10, 192.168.123.11, 192.168.123.12) running Ubuntu 24.04 for the web application
-- 1 VM (192.168.123.13) running Ubuntu 24.04 as the Nginx reverse proxy
+---
 
-## Prerequisites
+## Table of Contents
 
-- All VMs should have Ubuntu 24.04 installed
-- All VMs should have the same username (abdur) and password (16051)
-- Python 3 installed on all VMs
-- Ansible installed on the control machine
+- [Problem 1: Environment Setup](#problem-1-environment-setup)
+  - [Task 1: Manual Setup](#task-1-manual-setup)
+  - [Task 2: Automate Setup with Ansible](#task-2-automate-setup-with-ansible)
+- [Problem 2: Web Application Development](#problem-2-web-application-development)
+- [Problem 3: Deployment Pipeline](#problem-3-deployment-pipeline)
+- [Problem 4: Monitoring](#problem-4-monitoring)
+- [Testing](#testing)
+- [Technologies Used](#technologies-used)
 
-## Project Structure
+---
 
-- `inventory/`: Contains the inventory files with host definitions
-- `roles/`: Contains the Ansible roles
-  - `common/`: Installs Docker on all VMs using the official Docker installation script
-  - `web_app/`: Deploys a web application on the web server VMs
-  - `nginx_proxy/`: Configures the Nginx reverse proxy
-- `playbooks/`: Contains the main playbook files
+## Problem 1: Environment Setup
 
-## Setup
+### Task 1: Manual Setup
 
-1. The inventory file is already configured with your VM IP addresses and credentials
-2. Verify connectivity to all VMs using the ping playbook
+**Virtual Machines Setup:**
+- Create 3 VMs using Oracle VirtualBox or VMware Workstation.
+- Install **Ubuntu Server 24.04 (No GUI)** on each VM.
+- Assign IPs from the `192.168.123.0/24` subnet.
+- Install **Docker** on each VM.
 
-## Running the Playbooks
+**Reverse Proxy Setup:**
+- Create a 4th VM as a **Reverse Proxy**.
+- Install **Docker**.
+- Deploy **Nginx** using Docker.
 
-### Using the Deployment Script
+### Task 2: Automate Setup with Ansible
 
-The project includes a convenience script to run the playbooks:
+Use Ansible playbooks to automate:
+- Installation of system dependencies (e.g., Docker).
+- Deployment of the web application on the 3 VMs.
+- Nginx configuration on the reverse proxy VM.
 
-```bash
-# Make the script executable
-chmod +x deploy.sh
+---
 
-# Test connectivity to all hosts
-./deploy.sh ping
+## Problem 2: Web Application Development
 
-# Install Docker on all hosts
-./deploy.sh docker
+Develop a simple web app with the following features:
+- Displays the **hostname** of the VM it's running on.
+- Shows the **current commit hash** of the deployed code.
+- Dockerize the application.
 
-# Deploy web application to web servers
-./deploy.sh webapp
+---
 
-# Configure Nginx reverse proxy
-./deploy.sh nginx
+## Problem 3: Deployment Pipeline
 
-# Deploy entire infrastructure (default)
-./deploy.sh all
-# or simply
-./deploy.sh
-```
+Use **GitHub Actions** for the CI/CD pipeline:
 
-### Using Ansible Directly
+### Continuous Integration (CI):
+- Build the Docker image.
+- Push the image to **DockerHub**.
 
-To deploy the entire infrastructure:
+### Continuous Delivery (CD):
+- Deploy the Docker image to the 3 web server VMs.
 
-```bash
-ansible-playbook -i inventory/hosts.ini playbooks/site.yml
-```
+---
 
-To run specific roles:
+## Problem 4: Monitoring
 
-```bash
-# Install Docker only
-ansible-playbook -i inventory/hosts.ini playbooks/site.yml --tags "common"
+### Monitoring Setup:
+- Install **Prometheus** and **Grafana** on the reverse proxy VM.
 
-# Deploy web application only
-ansible-playbook -i inventory/hosts.ini playbooks/site.yml --tags "web_app"
+### System Monitoring:
+- Configure Prometheus to scrape metrics from the 3 web server VMs.
+- Create a Grafana dashboard to visualize:
+  - CPU usage
+  - Memory usage
+  - Disk usage
+  - Network statistics
 
-# Configure Nginx reverse proxy only
-ansible-playbook -i inventory/hosts.ini playbooks/site.yml --tags "nginx_proxy"
-```
+---
 
-## Verification
+## Testing
 
-After running the playbooks, you can verify the setup by:
+- Ensure everything works by accessing the web application at:  
+  **http://myapp.com**
 
-1. Accessing the web application through the Nginx reverse proxy at http://192.168.123.13
-2. Add an entry to your local hosts file to map `myapp.com` to 192.168.123.13 for complete testing
+---
 
-## Troubleshooting
+## Technologies Used
 
-- Check the Docker service status on each VM: `sudo systemctl status docker`
-- Check if the containers are running: `docker ps`
-- Check Nginx proxy logs: `docker logs nginx_proxy` 
+- Ubuntu Server 24.04
+- Docker
+- Nginx
+- Ansible
+- GitHub Actions
+- Prometheus
+- Grafana
+- VirtualBox / VMware
+
+---
