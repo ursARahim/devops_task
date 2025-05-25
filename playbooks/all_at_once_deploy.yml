@@ -1,6 +1,4 @@
 ---
-# Main playbook to deploy the entire infrastructure
-
 # Install Docker on all hosts
 - import_playbook: install_docker.yml
   tags: ['common', 'docker']

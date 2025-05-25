@@ -1,5 +1,4 @@
 ---
-# Playbook to deploy the Django web application to web server VMs
 - name: Deploy Django Web Application
   hosts: web_servers
   become: yes

@@ -1,25 +1,14 @@
----
 - name: Install Nginx using Docker on VM4 as a reverse proxy
   hosts: proxy
   become: yes
+  vars:
+    backend_servers:
+      - 192.168.123.10
+      - 192.168.123.11
+      - 192.168.123.12
+    static_server: 192.168.123.10
+  
   tasks:
-    - name: Stop existing Nginx container if exists
-      shell: docker stop nginx-proxy || true
-      ignore_errors: yes
-
-    - name: Remove existing Nginx container if exists
-      shell: docker rm nginx-proxy || true
-      ignore_errors: yes
-
-    - name: Remove existing Nginx images
-      shell: docker rmi nginx:latest || true
-      ignore_errors: yes
-
-    - name: Remove container creation flag file if exists
-      file:
-        path: /tmp/nginx_container_created
-        state: absent
-
     - name: Create directory for Nginx configuration
       file:
         path: /home/{{ ansible_user }}/nginx-proxy
@@ -27,7 +16,7 @@
         mode: '0755'
 
     - name: Create Nginx configuration file
-      copy:
+      template:
         dest: /home/{{ ansible_user }}/nginx-proxy/nginx.conf
         content: |
           user  nginx;
@@ -50,9 +39,9 @@
               keepalive_timeout  65;
 
               upstream django_app {
-                  server 192.168.123.10:80;
-                  server 192.168.123.11:80;
-                  server 192.168.123.12:80;
+                  {% for server in backend_servers %}
+                  server {{ server }}:80;
+                  {% endfor %}
               }
 
               server {
@@ -60,7 +49,7 @@
                   server_name  myapp.com www.myapp.com;
 
                   location /static/ {
-                      proxy_pass http://192.168.123.10:80;
+                      proxy_pass http://{{ static_server }}:80;
                       proxy_set_header Host $host;
                       proxy_set_header X-Real-IP $remote_addr;
                   }
@@ -70,7 +59,6 @@
                       proxy_set_header Host $host;
                       proxy_set_header X-Real-IP $remote_addr;
                       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-
                       proxy_redirect off;
                   }
               }
@@ -78,25 +66,33 @@
         mode: '0644'
       register: nginx_config
 
+    - name: Check if Nginx container exists
+      docker_container_info:
+        name: nginx-proxy
+      register: container_info
+
     - name: Pull latest Nginx image
-      shell: docker pull nginx:latest
+      docker_image:
+        name: nginx:latest
+        source: pull
+        force_source: yes
 
     - name: Run Nginx container
-      shell: docker run -d --name nginx-proxy -p 80:80 -v /home/{{ ansible_user }}/nginx-proxy/nginx.conf:/etc/nginx/nginx.conf:ro --restart=always nginx:latest
-      args:
-        creates: /tmp/nginx_container_created
-        
-    - name: Touch flag file to indicate container creation
-      file:
-        path: /tmp/nginx_container_created
-        state: touch
-        mode: '0644'
-        
-    - name: Check if Nginx container is running
-      shell: docker ps | grep nginx-proxy
+      docker_container:
+        name: nginx-proxy
+        image: nginx:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "80:80"
+        volumes:
+          - /home/{{ ansible_user }}/nginx-proxy/nginx.conf:/etc/nginx/nginx.conf:ro
       register: container_status
-      changed_when: false
+      when: not container_info.exists or nginx_config.changed
       
-    - name: Show container status
-      debug:
-        var: container_status.stdout         var: container_status.stdout 
+    - name: Restart Nginx container if config changed
+      docker_container:
+        name: nginx-proxy
+        state: started
+        restart: yes
+      when: nginx_config.changed and container_info.exists

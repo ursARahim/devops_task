@@ -1,8 +1,12 @@
----
 - name: Install Grafana using Docker on VM4
   hosts: proxy
   become: yes
   tasks:
+    - name: Install Docker Python package
+      pip:
+        name: docker
+        state: present
+
     - name: Create directories for Grafana
       file:
         path: "/home/{{ ansible_user }}/{{ item }}"
@@ -11,25 +15,47 @@
       with_items:
         - grafana
         - grafana/data
+        - grafana/provisioning
 
-    - name: Stop existing Grafana container if exists
-      shell: docker stop grafana || true
-      ignore_errors: yes
-
-    - name: Remove existing Grafana container if exists
-      shell: docker rm grafana || true
+    - name: Stop and remove existing Grafana container if exists
+      docker_container:
+        name: grafana
+        state: absent
+        force_kill: yes
       ignore_errors: yes
 
     - name: Pull Grafana image
-      shell: docker pull grafana/grafana:latest
+      docker_image:
+        name: grafana/grafana
+        source: pull
+        tag: latest
+
+    - name: Create Grafana datasource provisioning for Prometheus
+      copy:
+        dest: "/home/{{ ansible_user }}/grafana/provisioning/datasources.yaml"
+        content: |
+          apiVersion: 1
+          datasources:
+            - name: Prometheus
+              type: prometheus
+              access: proxy
+              url: http://{{ ansible_host }}:9090  # Use host IP instead of container name
+              isDefault: true
+              editable: false
+        mode: '0644'
 
     - name: Run Grafana container
-      shell: >
-        docker run -d
-        --name grafana
-        --restart always
-        -p 3000:3000
-        -v /home/{{ ansible_user }}/grafana/data:/var/lib/grafana
-        -e "GF_SERVER_ROOT_URL=http://myapp.com/grafana"
-        -e "GF_SERVER_SERVE_FROM_SUB_PATH=true"
-        grafana/grafana:latest
+      docker_container:
+        name: grafana
+        image: grafana/grafana:latest
+        restart_policy: always
+        ports:
+          - "3000:3000"
+        volumes:
+          - "/home/{{ ansible_user }}/grafana/data:/var/lib/grafana"
+          - "/home/{{ ansible_user }}/grafana/provisioning:/etc/grafana/provisioning"
+        env:
+          GF_SERVER_ROOT_URL: "http://myapp.com/grafana"
+          GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+          GF_SECURITY_ADMIN_PASSWORD: "password"
+          GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"

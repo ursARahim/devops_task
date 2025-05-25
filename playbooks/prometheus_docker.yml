@@ -1,4 +1,3 @@
----
 - name: Install Prometheus using Docker on VM4
   hosts: proxy
   become: yes
@@ -11,6 +10,12 @@
       with_items:
         - prometheus
         - prometheus/config
+
+    - name: Create data directory for Prometheus
+      file:
+        path: "/home/{{ ansible_user }}/prometheus/data"
+        state: directory
+        mode: '0755'
 
     - name: Create Prometheus configuration
       copy:
@@ -29,25 +34,30 @@
                   - '192.168.123.12:80'  # VM3
               metrics_path: '/metrics'    # Django metrics endpoint
 
-    - name: Stop existing Prometheus container if exists
-      shell: docker stop prometheus || true
-      ignore_errors: yes
-
-    - name: Remove existing Prometheus container if exists
-      shell: docker rm prometheus || true
+    - name: Stop and remove existing Prometheus container if exists
+      docker_container:
+        name: prometheus
+        state: absent
+        force_kill: yes
       ignore_errors: yes
 
     - name: Pull Prometheus image
-      shell: docker pull prom/prometheus:latest
+      docker_image:
+        name: prom/prometheus
+        source: pull
+        tag: latest
 
     - name: Run Prometheus container
-      shell: >
-        docker run -d
-        --name prometheus
-        --restart always
-        -p 9090:9090
-        -v /home/{{ ansible_user }}/prometheus/config:/etc/prometheus
-        prom/prometheus:latest
-        --config.file=/etc/prometheus/prometheus.yml
-        --web.external-url=/prometheus/
-        --web.route-prefix=/prometheus/ 
+      docker_container:
+        name: prometheus
+        image: prom/prometheus:latest
+        restart_policy: always
+        ports:
+          - "9090:9090"
+        volumes:
+          - "/home/{{ ansible_user }}/prometheus/config:/etc/prometheus"
+          - "/home/{{ ansible_user }}/prometheus/data:/prometheus"
+        command: 
+          - "--config.file=/etc/prometheus/prometheus.yml"
+          - "--web.external-url=/prometheus/"
+          - "--web.route-prefix=/prometheus/"

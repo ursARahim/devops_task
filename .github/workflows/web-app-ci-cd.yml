@@ -4,15 +4,15 @@ on:
   push:
     branches: [master]
     paths:
-      - 'web-app/**'  # Only trigger when web-app directory has changes
+      - 'web-app/**'
   pull_request:
     branches: [master]
     paths:
-      - 'web-app/**'  # Only trigger when web-app directory has changes
+      - 'web-app/**'
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest  # Using GitHub-hosted runner for build & push
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

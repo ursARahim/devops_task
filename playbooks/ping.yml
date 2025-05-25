@@ -1,12 +1,10 @@
 ---
-# Enhanced ping playbook to test connectivity and gather system information
-
 - name: Test connection to all hosts
   hosts: all
   tasks:
     - name: Ping test
       ping:
-      
+
     - name: Get hostname
       command: hostname
       register: hostname_output
