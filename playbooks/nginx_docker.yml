@@ -8,7 +8,7 @@
       - 192.168.123.11
       - 192.168.123.12
     static_server: 192.168.123.10
-  
+
   tasks:
     - name: Create directory for Nginx configuration
       file:
@@ -17,7 +17,7 @@
         mode: '0755'
 
     - name: Create Nginx configuration file
-      template:
+      copy:
         dest: /home/{{ ansible_user }}/nginx-proxy/nginx.conf
         content: |
           user  nginx;
