@@ -1,3 +1,4 @@
+---
 - name: Install Prometheus using Docker on VM4
   hosts: proxy
   become: yes

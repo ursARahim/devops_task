@@ -1,12 +1,8 @@
+---
 - name: Install Grafana using Docker on VM4
   hosts: proxy
   become: yes
   tasks:
-    - name: Install Docker Python package
-      pip:
-        name: docker
-        state: present
-
     - name: Create directories for Grafana
       file:
         path: "/home/{{ ansible_user }}/{{ item }}"

@@ -3,12 +3,12 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [master]
-    paths:
-      - 'web-app/**'
+#    paths:
+#      - 'web-app/**'
   pull_request:
     branches: [master]
-    paths:
-      - 'web-app/**'
+#    paths:
+#      - 'web-app/**'
 
 jobs:
   build-and-push:
@@ -32,6 +32,9 @@ jobs:
           context: ./web-app
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/django-web-app:latest
+          build-args: |
+            GIT_COMMIT_HASH=${{ github.sha }}
+            GIT_COMMIT_MESSAGE=${{ github.event.head_commit.message }}
 
   deploy:
     needs: build-and-push

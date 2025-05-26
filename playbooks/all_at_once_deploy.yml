@@ -1,7 +1,7 @@
 ---
 # Install Docker on all hosts
 - import_playbook: install_docker.yml
-  tags: ['common', 'docker']
+  tags: [docker']
 
 # Deploy web application to web servers
 - import_playbook: deploy_webapp.yml

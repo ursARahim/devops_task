@@ -1,3 +1,4 @@
+---
 - name: Install Nginx using Docker on VM4 as a reverse proxy
   hosts: proxy
   become: yes
