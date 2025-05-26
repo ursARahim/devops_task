@@ -1,0 +1,17 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        # These values will be captured at build time
+        GIT_COMMIT_HASH: ${GIT_COMMIT_HASH}
+        GIT_COMMIT_MESSAGE: ${GIT_COMMIT_MESSAGE}
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    # Override to use Django dev server locally
+    command: python manage.py runserver 0.0.0.0:8000
