@@ -36,6 +36,11 @@ jobs:
             GIT_COMMIT_HASH=${{ github.sha }}
             GIT_COMMIT_MESSAGE=${{ github.event.head_commit.message }}
 
+      - name: Debug Git Info
+        run: |
+          echo "Commit Hash: ${{ github.sha }}"
+          echo "Commit Message: ${{ github.event.head_commit.message }}"
+
   deploy:
     needs: build-and-push
     runs-on: [self-hosted, Linux, local-ubuntu]
